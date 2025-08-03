@@ -45,7 +45,7 @@ export default function HowItWorks() {
     });
 
     const data = await res.json();
-    setUploadedImage(`http://localhost:5000${data.image_url}`);
+    setUploadedImage(`https://hexify.onrender.com${data.image_url}`);
     setColors(data.colors);
   };
 
@@ -58,11 +58,11 @@ export default function HowItWorks() {
       >
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Try Hexify in Action
+            Try it with a sample
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto mb-10">
-            Upload an image or use our sample to see the power of instant color
-            palette extraction.
+            Not sure what to upload? Here's a sample image and the color palette
+            it generated:
           </p>
 
           {/* Preview Image */}
@@ -73,7 +73,7 @@ export default function HowItWorks() {
                 "https://www.coolphptools.com/userfiles/images/sample.jpg"
               }
               alt="Preview"
-              className="w-64 sm:w-72 rounded border border-gray-300 shadow-sm"
+              className="w-64 sm:w-72 rounded border bor`der-gray-300 shadow-sm"
             />
           </div>
 
