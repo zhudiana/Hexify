@@ -39,7 +39,7 @@ export default function HowItWorks() {
     const formData = new FormData();
     formData.append("image", file);
 
-    const res = await fetch("/upload", {
+    const res = await fetch("https://hexify.onrender.com/upload", {
       method: "POST",
       body: formData,
     });
