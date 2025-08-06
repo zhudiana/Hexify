@@ -44,6 +44,12 @@ export default function HowItWorks() {
       body: formData,
     });
 
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error("Upload failed:", errorText);
+      return;
+    }
+
     const data = await res.json();
     setUploadedImage(`https://hexify.onrender.com${data.image_url}`);
     setColors(data.colors);

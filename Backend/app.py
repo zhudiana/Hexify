@@ -13,7 +13,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 
-
 CORS(app, origins=["https://hexify-five.vercel.app"])
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -25,7 +24,7 @@ def rgb_to_hex(rgb):
 # Downscale image function
 def downscale_image(image_path, max_size=(800, 800)):
     with Image.open(image_path) as img:
-        img.thumbnail(max_size)  # Resize image to fit within the max size
+        img.thumbnail(max_size)  
         return np.array(img)
 
 def process_cluster(center, stds):
@@ -57,8 +56,7 @@ def upload_image():
         # Downscale the image
         image = downscale_image(f'.{image_url}')
 
-        # Sampling pixels (sampling 10% of pixels)
-        sampled_pixels = image[::10, ::10]  # Take every 10th pixel
+        sampled_pixels = image[::10, ::10] 
         r, g, b = [], [], []
 
         for row in sampled_pixels:
