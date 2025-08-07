@@ -30,16 +30,22 @@ export default function HowItWorks() {
     }
   };
 
+  const API_URL =
+    import.meta.env.MODE === "development"
+      ? "/upload"
+      : "https://hexify.onrender.com/upload";
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setPreview(URL.createObjectURL(file));
-
     const formData = new FormData();
     formData.append("image", file);
 
-    const res = await fetch("https://hexify.onrender.com/upload", {
+    console.log("Sending to:", API_URL); // 🔍 confirm in console
+
+    const res = await fetch(API_URL, {
       method: "POST",
       body: formData,
     });
@@ -54,6 +60,31 @@ export default function HowItWorks() {
     setUploadedImage(`https://hexify.onrender.com${data.image_url}`);
     setColors(data.colors);
   };
+
+  // const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
+
+  //   setPreview(URL.createObjectURL(file));
+
+  //   const formData = new FormData();
+  //   formData.append("image", file);
+
+  //   const res = await fetch("https://hexify.onrender.com/upload", {
+  //     method: "POST",
+  //     body: formData,
+  //   });
+
+  //   if (!res.ok) {
+  //     const errorText = await res.text();
+  //     console.error("Upload failed:", errorText);
+  //     return;
+  //   }
+
+  //   const data = await res.json();
+  //   setUploadedImage(`https://hexify.onrender.com${data.image_url}`);
+  //   setColors(data.colors);
+  // };
 
   return (
     <>
