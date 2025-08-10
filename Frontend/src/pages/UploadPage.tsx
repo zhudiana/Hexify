@@ -39,7 +39,7 @@ export default function HowItWorks() {
     const formData = new FormData();
     formData.append("image", file);
 
-    const res = await fetch("https://hexify.onrender.com/upload", {
+    const res = await fetch("http://localhost:5000/upload", {
       method: "POST",
       body: formData,
     });
@@ -51,9 +51,29 @@ export default function HowItWorks() {
     }
 
     const data = await res.json();
-    setUploadedImage(`https://hexify.onrender.com${data.image_url}`);
+    setUploadedImage(`http://localhost:5000${data.image_url}`);
     setColors(data.colors);
   };
+
+  function exportPalette(colors: { hex: string; percentage: number }[]) {
+    const payload = {
+      name: "Hexify Palette",
+      exportedAt: new Date().toISOString(),
+      colors, // [{hex, percentage}]
+    };
+
+    const json = JSON.stringify(payload, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `palette-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <>
@@ -126,7 +146,7 @@ export default function HowItWorks() {
                       <td className="p-4">
                         <button
                           onClick={() => copyToClipboard(color.hex)}
-                          className="flex items-center space-x-2 px-3 py-1 bg-teal-50 text-teal-600 rounded-md hover:bg-teal-100 transition-colors text-sm"
+                          className="w-24 flex items-center space-x-2 px-3 py-1 bg-teal-50 text-teal-600 rounded-md hover:bg-teal-100 transition-colors text-sm"
                         >
                           {copiedColor === color.hex ? (
                             <>
@@ -147,6 +167,12 @@ export default function HowItWorks() {
               </table>
             </div>
           )}
+          <button
+            onClick={() => exportPalette(colors)}
+            className="mt-6 px-4 py-2 rounded-md bg-teal-600 text-white hover:bg-teal-700"
+          >
+            Export palette (JSON)
+          </button>
         </div>
       </section>
     </>

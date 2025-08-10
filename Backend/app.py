@@ -13,7 +13,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 
-CORS(app, origins=["https://hexify-five.vercel.app"])
+CORS(app, origins=["http://localhost:5173"])
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
