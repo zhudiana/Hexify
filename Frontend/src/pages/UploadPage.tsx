@@ -39,7 +39,7 @@ export default function HowItWorks() {
     const formData = new FormData();
     formData.append("image", file);
 
-    const res = await fetch("http://localhost:5000/upload", {
+    const res = await fetch("http://localhost:5000/api/upload", {
       method: "POST",
       body: formData,
     });
@@ -59,7 +59,7 @@ export default function HowItWorks() {
     const payload = {
       name: "Hexify Palette",
       exportedAt: new Date().toISOString(),
-      colors, // [{hex, percentage}]
+      colors,
     };
 
     const json = JSON.stringify(payload, null, 2);

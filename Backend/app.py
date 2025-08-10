@@ -38,7 +38,7 @@ def process_cluster(center, stds):
     return rgb, hex_code
 
 
-@app.route('/upload', methods=['POST'])
+@app.route('/api/upload', methods=['POST'])
 def upload_image():
     if 'image' not in request.files:
         return "No image part", 400
