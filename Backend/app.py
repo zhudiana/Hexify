@@ -95,7 +95,7 @@ def upload_image():
                 'percentage': round(percentages[i], 2)
             })
 
-        # Sort by percentage (optional)
+        # Sort by percentage 
         color_data = sorted(color_data, key=lambda x: -x['percentage'])
 
         return jsonify({
