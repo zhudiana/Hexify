@@ -1,10 +1,91 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Upload, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { uploadImageFile } from "../utils/uploadImage";
 
 export default function Hero() {
   const navigate = useNavigate();
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dropZoneRef = useRef<HTMLDivElement | null>(null);
+
+  const handleUploadResult = (uploadedImageUrl: string, colors: any[]) => {
+    navigate("/upload", { state: { uploadedImageUrl, colors } });
+  };
+
+  const handleFile = async (file: File) => {
+    try {
+      const { uploadedImageUrl, colors } = await uploadImageFile(file);
+      handleUploadResult(uploadedImageUrl, colors);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const onChooseFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const onFileInputChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const chosenFile = e.target.files?.[0];
+    if (chosenFile) {
+      void handleFile(chosenFile);
+      // Reset input so selecting the same file again triggers change
+      e.currentTarget.value = "";
+    }
+  };
+
+  const onDragOver: React.DragEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const onDragLeave: React.DragEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
+  const onDrop: React.DragEventHandler<HTMLDivElement> = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      void handleFile(file);
+    }
+  };
+
+  const onPaste: React.ClipboardEventHandler<HTMLDivElement> = (e) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      if (item.type.startsWith("image")) {
+        const file = item.getAsFile();
+        if (file) {
+          void handleFile(file);
+          break;
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    const onWindowPaste = (e: ClipboardEvent) => {
+      if (!dropZoneRef.current) return;
+      // Only handle paste if the user is around the hero section viewport
+      const rect = dropZoneRef.current.getBoundingClientRect();
+      const isVisible = rect.top < window.innerHeight && rect.bottom > 0;
+      if (!isVisible) return;
+      for (const item of e.clipboardData?.items ?? []) {
+        if (item.type.startsWith("image")) {
+          const file = item.getAsFile();
+          if (file) void handleFile(file);
+        }
+      }
+    };
+    window.addEventListener("paste", onWindowPaste);
+    return () => window.removeEventListener("paste", onWindowPaste);
+  }, []);
 
   return (
     <section
@@ -83,9 +164,28 @@ export default function Hero() {
             className="relative"
           >
             <div className="relative bg-white rounded-3xl shadow-2xl p-8 border border-gray-200/50">
-              <div className="aspect-square bg-teal-50 rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center space-y-4 hover:border-teal-400 transition-colors duration-300 cursor-pointer group">
+              <div
+                ref={dropZoneRef}
+                tabIndex={0}
+                onDragOver={onDragOver}
+                onDragLeave={onDragLeave}
+                onDrop={onDrop}
+                onPaste={onPaste}
+                className={`aspect-square bg-teal-50 rounded-2xl border-2 border-dashed ${
+                  dragActive ? "border-teal-400" : "border-gray-300"
+                } flex flex-col items-center justify-center space-y-4 transition-colors duration-300 cursor-pointer group`}
+                onClick={onChooseFileClick}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={onFileInputChange}
+                />
+
                 <button
-                  onClick={() => navigate("/upload")}
+                  type="button"
                   className="group bg-teal-600 text-white px-8 py-4 rounded-full hover:bg-teal-700 hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold text-lg flex items-center justify-center space-x-2"
                 >
                   <Upload className="w-5 h-5 group-hover:rotate-12 transition-transform" />

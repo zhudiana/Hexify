@@ -1,8 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Copy, Check } from "lucide-react";
 import Header from "../components/Header";
+import { useLocation } from "react-router-dom";
+import { uploadImageFile } from "../utils/uploadImage";
 
 export default function HowItWorks() {
+  const location = useLocation();
+  const navigationState = location.state as
+    | {
+        uploadedImageUrl?: string;
+        colors?: { hex: string; percentage: number }[];
+        file?: File;
+      }
+    | undefined;
   const [preview, setPreview] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [copiedColor, setCopiedColor] = useState<string | null>(null);
@@ -30,29 +40,31 @@ export default function HowItWorks() {
     }
   };
 
+  useEffect(() => {
+    if (navigationState?.uploadedImageUrl) {
+      setUploadedImage(navigationState.uploadedImageUrl);
+    }
+    if (navigationState?.colors && navigationState.colors.length > 0) {
+      setColors(navigationState.colors);
+    }
+    if (navigationState?.file) {
+      setPreview(URL.createObjectURL(navigationState.file));
+    }
+  }, [navigationState]);
+
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setPreview(URL.createObjectURL(file));
 
-    const formData = new FormData();
-    formData.append("image", file);
-
-    const res = await fetch("http://localhost:5000/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    if (!res.ok) {
-      const errorText = await res.text();
-      console.error("Upload failed:", errorText);
-      return;
+    try {
+      const { uploadedImageUrl, colors } = await uploadImageFile(file);
+      setUploadedImage(uploadedImageUrl);
+      setColors(colors);
+    } catch (err) {
+      console.error("Upload failed:", err);
     }
-
-    const data = await res.json();
-    setUploadedImage(`http://localhost:5000${data.image_url}`);
-    setColors(data.colors);
   };
 
   function exportPalette(colors: { hex: string; percentage: number }[]) {
@@ -95,6 +107,7 @@ export default function HowItWorks() {
           <div className="flex justify-center">
             <img
               src={
+                preview ??
                 uploadedImage ??
                 "https://www.coolphptools.com/userfiles/images/sample.jpg"
               }
